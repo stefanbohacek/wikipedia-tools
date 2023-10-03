@@ -140,7 +140,7 @@ const fetchAllData = async (page, next) => {
   } else {
     processData(date);
 
-    setTimeout(() => {
+    setInterval(() => {
       fetchAllData();
     }, 3600000);
   }
