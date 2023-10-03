@@ -87,7 +87,7 @@ const fetchData = async () => {
     const dir = `./data/en/${date}`;
 
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
+      fs.mkdirSync(dir, { recursive: true });
       fetchAllData();
     } else {
       const files = fs.readdirSync(dir, { withFileTypes: false });
