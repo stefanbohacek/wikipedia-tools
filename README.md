@@ -28,6 +28,9 @@ Response:
 ]
 ```
 
+**/wikidata/?query=QUERY**
+
+
 ## Development
 
 ```sh

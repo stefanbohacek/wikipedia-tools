@@ -3,6 +3,7 @@ import compression from 'compression';
 import bodyParser from 'body-parser';
 import indexRoute from './routes/index.js';
 import topEdits from './routes/top-edits.js';
+import wikidata from './routes/wikidata.js';
 import fetchData from './modules/fetch-data.js';
 
 const app = express();
@@ -26,7 +27,10 @@ app.use((req, res, next) => {
 
 app.use('/', indexRoute);
 app.use('/top-edits', topEdits);
+app.use('/wikidata', wikidata);
 
-fetchData();
+if (process.env.ENVIRONMENT === "production"){
+  fetchData();
+}
 
 export default app;
