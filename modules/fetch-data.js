@@ -78,12 +78,8 @@ const processData = async (date) => {
   );
 };
 
-const fetchData = async (date) => {
-  date = date || null;
-
-  if (date === null){
-    date = getDate();
-  }
+const fetchData = async () => {
+  const date = getDate();
 
   if (!fs.existsSync(`./public/data/en/${date}.json`)){
     console.log(`fetching data for ${date}...`);
@@ -92,7 +88,7 @@ const fetchData = async (date) => {
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
-      await fetchAllData(date);
+      fetchAllData();
     } else {
       const files = fs.readdirSync(dir, { withFileTypes: false });
       const indices = files.map((file) => parseInt(file.replace(".json")));
@@ -102,21 +98,20 @@ const fetchData = async (date) => {
   
       if (data?.continue?.arvcontinue) {
         const index = lastIndex + 1;
-        await fetchAllData(date, index, data.continue.arvcontinue);
+        fetchAllData(index, data.continue.arvcontinue);
       } else {
-        await processData(date);
+        processData(date);
       }
     }
   } else {
     console.log(`data for ${date} exists`);
   }
-  return {error: null};
 };
 
-const fetchAllData = async (date, page, next) => {
+const fetchAllData = async (page, next) => {
   page = page || 0;
-  date = date || getDate();
 
+  const date = getDate();
   const dateStart = `${date}000000`;
   const dateEnd = `${date}235959`;
 
@@ -141,16 +136,14 @@ const fetchAllData = async (date, page, next) => {
   if (data?.continue?.arvcontinue) {
     await sleep(300);
     page++;
-    await fetchAllData(date, page, data.continue.arvcontinue);
+    fetchAllData(page, data.continue.arvcontinue);
   } else {
-    await processData(date);
+    processData(date);
 
-    setInterval(async () => {
-      await fetchAllData();
+    setInterval(() => {
+      fetchAllData();
     }, 3600000);
   }
-
-  return {error: null};
 };
 
 export default fetchData;
