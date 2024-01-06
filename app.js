@@ -29,8 +29,8 @@ app.use('/', indexRoute);
 app.use('/top-edits', topEdits);
 app.use('/wikidata', wikidata);
 
-if (process.env.ENVIRONMENT === "production"){
-  fetchData();
-}
+// if (process.env.ENVIRONMENT === "production"){
+//   fetchData();
+// }
 
 export default app;
