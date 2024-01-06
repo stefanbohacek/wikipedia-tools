@@ -54,14 +54,15 @@ const processData = async (date) => {
 
   resultArray = resultArray.filter((item) => item.revisions >= cutoff);
 
-
   let pageData = await fetch(
-    `https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids=${resultArray.map(page => page.pageID).join('|')}&inprop=url&format=json`
+    `https://en.wikipedia.org/w/api.php?action=query&prop=info&pageids=${resultArray
+      .map((page) => page.pageID)
+      .join("|")}&inprop=url&format=json`
   );
 
   let data = await pageData.json();
 
-  resultArray.forEach(page => {
+  resultArray.forEach((page) => {
     page.url = data.query.pages[page.pageID].fullurl;
   });
 
@@ -78,45 +79,40 @@ const processData = async (date) => {
   );
 };
 
-const fetchData = async (date) => {
-  date = date || null;
+const fetchData = async () => {
+  const date = getDate();
 
-  if (date === null){
-    date = getDate();
-  }
-
-  if (!fs.existsSync(`./public/data/en/${date}.json`)){
+  if (!fs.existsSync(`./public/data/en/${date}.json`)) {
     console.log(`fetching data for ${date}...`);
 
     const dir = `./data/en/${date}`;
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
-      await fetchAllData(date);
+      fetchAllData();
     } else {
       const files = fs.readdirSync(dir, { withFileTypes: false });
       const indices = files.map((file) => parseInt(file.replace(".json")));
       const lastIndex = Math.max(...indices);
       const lastFile = `${lastIndex}.json`;
       const data = JSON.parse(fs.readFileSync(`${dir}/${lastFile}`, "utf8"));
-  
+
       if (data?.continue?.arvcontinue) {
         const index = lastIndex + 1;
-        await fetchAllData(date, index, data.continue.arvcontinue);
+        fetchAllData(index, data.continue.arvcontinue);
       } else {
-        await processData(date);
+        processData(date);
       }
     }
   } else {
     console.log(`data for ${date} exists`);
   }
-  return {error: null};
 };
 
-const fetchAllData = async (date, page, next) => {
+const fetchAllData = async (page, next) => {
   page = page || 0;
-  date = date || getDate();
 
+  const date = getDate();
   const dateStart = `${date}000000`;
   const dateEnd = `${date}235959`;
 
@@ -141,16 +137,14 @@ const fetchAllData = async (date, page, next) => {
   if (data?.continue?.arvcontinue) {
     await sleep(300);
     page++;
-    await fetchAllData(date, page, data.continue.arvcontinue);
+    fetchAllData(page, data.continue.arvcontinue);
   } else {
-    await processData(date);
+    processData(date);
 
-    setInterval(async () => {
-      await fetchAllData();
+    setInterval(() => {
+      fetchAllData();
     }, 3600000);
   }
-
-  return {error: null};
 };
 
 export default fetchData;
