@@ -5,7 +5,32 @@ import NodeCache from "node-cache";
 import rejectRequest from "../modules/reject-request.js";
 import queryWikidata from "../modules/wikidata.js";
 
-const appCache = new NodeCache({ stdTTL: 1800, checkperiod: 60 });
+const appCache = new NodeCache({
+  stdTTL: 1800,
+  checkperiod: 60,
+  deleteOnExpire: false
+});
+
+const updateWikiData = async (query) => {
+  console.log("updating cache...", query);
+  const queryHash = md5(query);  
+  const cacheKey = `wikidata:${queryHash}`;
+  let queryResults = await queryWikidata(query);
+
+  if (queryResults?.results?.bindings){
+    queryResults = queryResults.results.bindings;
+    const success = appCache.set(cacheKey, {
+      query,
+      results: queryResults
+    });
+  }
+  return queryResults;
+}
+
+appCache.on( "expired", ( key, value ) => {
+  updateWikiData(value.query);
+});
+
 
 const router = express.Router();
 
@@ -27,13 +52,10 @@ router.get("/", async (req, res) => {
       const cachedQueryResults = appCache.get(cacheKey);
 
       if (cachedQueryResults == undefined) {
-        queryResults = await queryWikidata(query);
-        if (queryResults?.results?.bindings){
-          queryResults = queryResults.results.bindings;
-          const success = appCache.set(cacheKey, queryResults);
-        }
+        queryResults = await updateWikiData(query);
       } else {
-        queryResults = cachedQueryResults;
+        console.log("loading from cache...");
+        queryResults = cachedQueryResults.results;
       }
 
       res.json(queryResults);
