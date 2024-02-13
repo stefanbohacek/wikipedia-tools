@@ -138,14 +138,15 @@ const fetchAllData = async (page, next) => {
   if (data?.continue?.arvcontinue) {
     await sleep(300);
     page++;
-    fetchAllData(page, data.continue.arvcontinue);
+    await fetchAllData(page, data.continue.arvcontinue);
   } else {
     processData(date);
 
-    setInterval(() => {
-      fetchAllData();
+    setInterval(async () => {
+      await fetchAllData();
     }, 3600000);
   }
+  return true;
 };
 
 export default fetchData;
