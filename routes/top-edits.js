@@ -1,7 +1,6 @@
 import express from "express";
 import fs from "fs";
 import rejectRequest from "../modules/reject-request.js";
-import fetchData from "../modules/fetch-data.js";
 
 const router = express.Router();
 
@@ -16,8 +15,7 @@ router.get("/", async (req, res) => {
     if (fs.existsSync(filePath)) {
       response = JSON.parse(fs.readFileSync(`${filePath}`, "utf8"));
     } else {
-      const newData = await fetchData(date);
-      response = JSON.parse(fs.readFileSync(`${filePath}`, "utf8"));
+      response = { err: "no_data" };
     }
 
     res.json(response);
