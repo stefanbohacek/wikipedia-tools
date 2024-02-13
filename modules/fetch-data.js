@@ -79,8 +79,8 @@ const processData = async (date) => {
   );
 };
 
-const fetchData = async () => {
-  const date = getDate();
+const fetchData = async (fetchDate) => {
+  const date = fetchDate || getDate();
 
   if (!fs.existsSync(`./public/data/en/${date}.json`)) {
     console.log(`fetching data for ${date}...`);
@@ -89,7 +89,7 @@ const fetchData = async () => {
 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
-      fetchAllData();
+      await fetchAllData();
     } else {
       const files = fs.readdirSync(dir, { withFileTypes: false });
       const indices = files.map((file) => parseInt(file.replace(".json")));
@@ -99,14 +99,15 @@ const fetchData = async () => {
 
       if (data?.continue?.arvcontinue) {
         const index = lastIndex + 1;
-        fetchAllData(index, data.continue.arvcontinue);
+        await fetchAllData(index, data.continue.arvcontinue);
       } else {
-        processData(date);
+        await processData(date);
       }
     }
   } else {
     console.log(`data for ${date} exists`);
   }
+  return true;
 };
 
 const fetchAllData = async (page, next) => {
