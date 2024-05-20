@@ -110,40 +110,44 @@ const fetchData = async () => {
 };
 
 const fetchAllData = async (page, next) => {
-  page = page || 0;
+  try {
+    page = page || 0;
 
-  const date = getDate();
-  const dateStart = `${date}000000`;
-  const dateEnd = `${date}235959`;
-
-  let url = `https://en.wikipedia.org/w/api.php?action=query&list=allrevisions&arvnamespace=0&arvstart=${dateStart}&arvend=${dateEnd}&arvprop=ids%7Ctimestamp&arvdir=newer&arvlimit=max&format=json`;
-
-  if (next) {
-    url = `${url}&arvcontinue=${next}`;
-  }
-
-  console.log("fetching...", url);
-
-  let response = await fetch(url);
-  let data = await response.json();
-  console.log("saving...");
-
-  fs.writeFileSync(
-    `./data/en/${date}/${page}.json`,
-    JSON.stringify(data),
-    "utf8"
-  );
-
-  if (data?.continue?.arvcontinue) {
-    await sleep(300);
-    page++;
-    fetchAllData(page, data.continue.arvcontinue);
-  } else {
-    processData(date);
-
-    setInterval(() => {
-      fetchAllData();
-    }, 3600000);
+    const date = getDate();
+    const dateStart = `${date}000000`;
+    const dateEnd = `${date}235959`;
+  
+    let url = `https://en.wikipedia.org/w/api.php?action=query&list=allrevisions&arvnamespace=0&arvstart=${dateStart}&arvend=${dateEnd}&arvprop=ids%7Ctimestamp&arvdir=newer&arvlimit=max&format=json`;
+  
+    if (next) {
+      url = `${url}&arvcontinue=${next}`;
+    }
+  
+    console.log("fetching...", url);
+  
+    let response = await fetch(url);
+    let data = await response.json();
+    console.log("saving...");
+  
+    fs.writeFileSync(
+      `./data/en/${date}/${page}.json`,
+      JSON.stringify(data),
+      "utf8"
+    );
+  
+    if (data?.continue?.arvcontinue) {
+      await sleep(1000);
+      page++;
+      fetchAllData(page, data.continue.arvcontinue);
+    } else {
+      processData(date);
+  
+      setInterval(() => {
+        fetchAllData();
+      }, 3600000);
+    }    
+  } catch (error) {
+    console.log("error", error);
   }
 };
 
