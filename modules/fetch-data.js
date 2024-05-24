@@ -129,13 +129,12 @@ const fetchAllData = async (page, next) => {
     let data = await response.json();
     console.log("saving...");
 
-    try {
+
+    if (!fs.existsSync(`./data/en/${date}/`)) {
       console.log(`creating folder ./data/en/${date}/...`);
       fs.mkdirSync(`./data/en/${date}/`, { recursive: true }); 
-    } catch (error) {
-      // noop      
-    }
-  
+    }   
+
     fs.writeFileSync(
       `./data/en/${date}/${page}.json`,
       JSON.stringify(data),
