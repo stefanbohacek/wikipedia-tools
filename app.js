@@ -30,7 +30,7 @@ app.use('/top-edits', topEdits);
 app.use('/wikidata', wikidata);
 
 if (process.env.ENVIRONMENT === "production"){
-  fetchData();
+  // fetchData();
 }
 
 export default app;
